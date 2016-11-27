@@ -1,17 +1,3 @@
-const a = {
-  prop: 1
-}
-
-const b = {
-  ref: a
-}
-
-const o = {
-  b: a,
-  c: [b],
-  d: b
-}
-
 const uuid = require('uuid')
 const traverse = require('traverse')
 const cloneDeep = require('lodash.clonedeep')
@@ -24,6 +10,7 @@ function findDuplicates (obj, filterType) {
 
   const dups = []
   const seenNodes = []
+  const dupObjects = []
 
   for (let i = 0, len = nodes.length; i < len; i++) {
     const node = nodes[i]
@@ -34,52 +21,63 @@ function findDuplicates (obj, filterType) {
         paths[previousIndex].node = nodes[previousIndex]
         dups.push(paths[i])
         paths[i].node = node
+        if (dupObjects.indexOf(node) === -1) {
+          dupObjects.push(node)
+        }
       } else {
         seenNodes.push(node)
       }
     }
   }
+  dups.refsList = dupObjects
   return dups
 }
 
-function replaceInstances (obj, uuid) {
-  
-}
-
 function stringify (obj) {
+  if (obj['__refs__']) {
+    throw new TypeError('object cannot have "__refs__" property')
+  }
   let dups = findDuplicates(obj, 'object')
+  console.log(dups)
 
   if (dups.length > 0) {
+    const refsList = dups.refsList
+    refsIdsList = []
     obj = cloneDeep(obj)
-    if (obj['__refs__']) {
-      throw new TypeError('object cannot have "__refs__" property')
-    }
+    
+    const trav = traverse(obj)
+
     obj['__refs__'] = {}
     dups = sortBy(dups, 'length')
     let i = dups.length
     while (i--) {
-      dupPath
+      const dupPath = dups[i]
+      const refsListIndex = refsList.indexOf(dupPath.node)
+      let id
+      if (!refsIdsList[refsListIndex]) {
+        id = uuid.v4()
+        refsIdsList[refsListIndex] = id
+        obj.__refs__[id] = trav.get(dupPath)
+        
+      } else {
+        id = refsIdsList[refsListIndex]
+      }
+
+      console.log('set', dupPath, id)
+      trav.set(dupPath, id)
     }
   }
-
-  return JSON.stringify(obj, function replacer (key, value) {
-    if (typeof value === 'object') {
-      if (objects.has(value)) {
-        console.log(key, value)
-       
-        const id = uuid.v4()
-
-        obj['__refs__'][id] = stringify(value, objects)
-        return '_or_' + id
-      }
-      objects.add(value)
-    }
-
-    return value
-  })
+  
+  return JSON.stringify(obj)
 }
 
-// console.log(stringify(o))
-console.log(findDuplicates(o, 'object'))
+function parse (str){
+  const parsed = JSON.parse(str)
 
-module.exports = stringify
+  delete parsed.__refs__
+  return parsed
+}
+
+module.exports = {
+  stringify, parse
+}

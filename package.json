@@ -4,7 +4,8 @@
   "description": "a utility for serializing/deserializing POJOs with object references",
   "main": "refserialize.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "dev": "ava -w"
   },
   "repository": {
     "type": "git",
@@ -30,5 +31,10 @@
   },
   "devDependencies": {
     "ava": "^0.17.0"
+  },
+   "ava": {
+    "files": [
+      "**/*.spec.js"
+    ]
   }
 }
