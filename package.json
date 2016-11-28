@@ -25,6 +25,7 @@
   "homepage": "https://github.com/capaj/refserialize#readme",
   "dependencies": {
     "lodash.clonedeep": "^4.5.0",
+    "lodash.foreach": "^4.5.0",
     "lodash.sortby": "^4.7.0",
     "traverse": "^0.6.6",
     "uuid": "^3.0.0"
@@ -32,7 +33,7 @@
   "devDependencies": {
     "ava": "^0.17.0"
   },
-   "ava": {
+  "ava": {
     "files": [
       "**/*.spec.js"
     ]

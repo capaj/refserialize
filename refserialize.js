@@ -2,6 +2,7 @@ const uuid = require('uuid')
 const traverse = require('traverse')
 const cloneDeep = require('lodash.clonedeep')
 const sortBy = require('lodash.sortby')
+const forEach = require('lodash.foreach')
 
 function findDuplicates (obj, filterType) {
   const trav = traverse(obj)
@@ -38,7 +39,6 @@ function stringify (obj) {
     throw new TypeError('object cannot have "__refs__" property')
   }
   let dups = findDuplicates(obj, 'object')
-  console.log(dups)
 
   if (dups.length > 0) {
     const refsList = dups.refsList
@@ -63,7 +63,6 @@ function stringify (obj) {
         id = refsIdsList[refsListIndex]
       }
 
-      console.log('set', dupPath, id)
       trav.set(dupPath, id)
     }
   }
@@ -73,11 +72,22 @@ function stringify (obj) {
 
 function parse (str){
   const parsed = JSON.parse(str)
-
-  delete parsed.__refs__
+  if (parsed.__refs__) {
+    const traverser = traverse(parsed)
+    const refIds = Object.keys(parsed.__refs__)
+    forEach(refIds, function (id) {
+      traverser.forEach(function (val) {
+        if (val === id) {
+          this.update(parsed.__refs__[id])
+        }
+      })
+    })
+    delete parsed.__refs__
+  }
   return parsed
 }
 
 module.exports = {
-  stringify, parse
+  stringify: stringify, 
+  parse: parse
 }

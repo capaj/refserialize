@@ -17,7 +17,7 @@ test('throws', (t) => {
   }, 'object cannot have "__refs__" property')
 })
 
-test('serializes', t => {
+test('stringifies and parses', t => {
   const a = {
     prop: 1
   }
@@ -49,11 +49,10 @@ test('serializes', t => {
     }
   })
   const parsed = parse(str)
-  console.log(parsed)
 
   t.is(parsed.a, parsed.b)
   t.is(parsed.c[0], parsed.d)
   t.is(parsed.__refs__, undefined)
-  // t.is(parsed.b, parsed.d.ref)
-  // t.is(parsed.b, parsed.c[0])
+  t.is(parsed.b, parsed.d.ref)
+  t.is(parsed.b, parsed.c[0].ref)
 })
